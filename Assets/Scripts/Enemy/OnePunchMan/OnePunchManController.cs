@@ -1,37 +1,37 @@
-using StatePattern.Enemy;
-using StatePattern.Player;
 using UnityEngine;
+using StatePattern.Enemy.Bullet;
+using StatePattern.Main;
+using StatePattern.Player;
 
-public class OnePunchManController : EnemyController
+namespace StatePattern.Enemy
 {
-    private OnePunchManStateMachine stateMachine;
-    private PlayerController target;
-    public PlayerController Target => target;
-
-    public OnePunchManController(EnemyScriptableObject enemyScriptableObject) : base(enemyScriptableObject)
+    public class OnePunchManController : EnemyController
     {
-        enemyView.SetController(this);
-        CreateStateMachine();
-        Debug.Log("State machine created");
-        stateMachine.ChangeState(OnePunchManStates.Idle);
+        private OnePunchManStateMachine stateMachine;
+
+        public OnePunchManController(EnemyScriptableObject enemyScriptableObject) : base(enemyScriptableObject)
+        {
+            enemyView.SetController(this);
+            CreateStateMachine();
+            stateMachine.ChangeState(OnePunchManStates.IDLE);
+        }
+
+        private void CreateStateMachine() => stateMachine = new OnePunchManStateMachine(this);
+
+        public override void UpdateEnemy()
+        {
+            if (currentState == EnemyState.DEACTIVE)
+                return;
+
+            stateMachine.Update();
+        }
+
+        public override void PlayerEnteredRange(PlayerController targetToSet)
+        {
+            base.PlayerEnteredRange(targetToSet);
+            stateMachine.ChangeState(OnePunchManStates.SHOOTING);
+        }
+
+        public override void PlayerExitedRange() => stateMachine.ChangeState(OnePunchManStates.IDLE);
     }
-
-    private void CreateStateMachine() => stateMachine = new OnePunchManStateMachine(this);
-    public override void UpdateEnemy()
-    {
-        if (currentState == EnemyState.DEACTIVE)
-            return;
-
-        stateMachine.Update();
-    }
-
-    public override void PlayerEnteredRange(PlayerController targetToSet)
-    {
-        base.PlayerEnteredRange(targetToSet);
-        target = targetToSet;
-        stateMachine.ChangeState(OnePunchManStates.Shooting);
-    }
-
-    public override void PlayerExitedRange() => stateMachine.ChangeState(OnePunchManStates.Idle);
-
 }

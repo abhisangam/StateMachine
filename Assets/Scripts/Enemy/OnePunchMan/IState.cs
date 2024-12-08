@@ -1,20 +1,10 @@
-using StatePattern.Enemy;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class IState
+namespace StatePattern.Enemy
 {
-    public OnePunchManController Owner;
-    public virtual void Enter()
+    public interface IState
     {
-    }
-
-    public virtual void Update()
-    {
-    }
-
-    public virtual void Exit()
-    {
+        public OnePunchManController Owner { get; set; }
+        public void OnStateEnter();
+        public void Update();
+        public void OnStateExit();
     }
 }

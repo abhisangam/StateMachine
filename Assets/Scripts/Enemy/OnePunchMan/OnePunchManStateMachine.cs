@@ -1,53 +1,51 @@
-using StatePattern.Enemy;
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class OnePunchManStateMachine
+namespace StatePattern.Enemy
 {
-    private OnePunchManController Owner;
-
-    protected Dictionary<OnePunchManStates, IState> States = new Dictionary<OnePunchManStates, IState>();
-
-    private IState currentState;
-    public OnePunchManStateMachine(OnePunchManController Owner)
+    public class OnePunchManStateMachine
     {
-        this.Owner = Owner;
-        CreateStates();
-        SetOwner();
-    }
+        private OnePunchManController Owner;
+        private IState currentState;
+        protected Dictionary<OnePunchManStates, IState> States = new Dictionary<OnePunchManStates, IState>();
 
-    public void Update()
-    {
-        Debug.Log("State machine updating");
-        currentState?.Update();
-    }
-
-    private void CreateStates()
-    {
-        States.Add(OnePunchManStates.Idle, new IdleState(this));
-        States.Add(OnePunchManStates.Rotating, new RotatingState(this));
-        States.Add(OnePunchManStates.Shooting, new ShootingState(this));
-    }
-
-    private void SetOwner()
-    {
-        foreach (var state in States.Values)
+        public OnePunchManStateMachine(OnePunchManController Owner)
         {
-            state.Owner = this.Owner;
+            this.Owner = Owner;
+            CreateStates();
+            SetOwner();
         }
+
+        private void CreateStates()
+        {
+            States.Add(OnePunchManStates.IDLE, new IdleState(this));
+            States.Add(OnePunchManStates.ROTATING, new RotatingState(this));
+            States.Add(OnePunchManStates.SHOOTING, new ShootingState(this));
+        }
+
+        private void SetOwner()
+        {
+            foreach(IState state in States.Values)
+            {
+                state.Owner = Owner;
+            }
+        }
+
+        public void Update() => currentState?.Update();
+
+        protected void ChangeState(IState newState)
+        {
+            currentState?.OnStateExit();
+            currentState = newState;
+            currentState?.OnStateEnter();
+        }
+
+        public void ChangeState(OnePunchManStates newState) => ChangeState(States[newState]);
     }
 
-    protected void ChangeState(IState state)
+    public enum OnePunchManStates
     {
-        currentState?.Exit();
-        currentState = state;
-        currentState.Enter();
-    }
-
-    public void ChangeState(OnePunchManStates newState) 
-    { 
-        ChangeState(States[newState]); 
-        Debug.Log("State changed to " + newState);
+        IDLE,
+        ROTATING,
+        SHOOTING
     }
 }
