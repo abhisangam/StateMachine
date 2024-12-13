@@ -1,25 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
+using StatePattern.StateMachine;
 using UnityEngine;
 
 namespace StatePattern.Enemy
 {
-    public class ChasingState : IState
+    public class RotatingState : IState
     {
         public EnemyController Owner { get; set; }
         private IStateMachine stateMachine;
         private float targetRotation;
 
-        public ChasingState(IStateMachine stateMachine) => this.stateMachine = stateMachine;
+        public RotatingState(IStateMachine stateMachine) => this.stateMachine = stateMachine;
 
-        public void OnStateEnter() {}
+        public void OnStateEnter() => targetRotation = (Owner.Rotation.eulerAngles.y + 180) % 360;
 
         public void Update()
         {
-            
+            Owner.SetRotation(CalculateRotation());
+            if (IsRotationComplete())
+                stateMachine.ChangeState(States.IDLE);
         }
 
-        public void OnStateExit() { }
+        public void OnStateExit() => targetRotation = 0;
 
         private Vector3 CalculateRotation() => Vector3.up * Mathf.MoveTowardsAngle(Owner.Rotation.eulerAngles.y, targetRotation, Owner.Data.RotationSpeed * Time.deltaTime);
 

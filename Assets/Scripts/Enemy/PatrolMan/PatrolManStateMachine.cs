@@ -1,39 +1,47 @@
-using StatePattern.Enemy;
+﻿using StatePattern.StateMachine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class PatrolManStateMachine : IStateMachine
+namespace StatePattern.Enemy
 {
-    private PatrolManController Owner;
-    private IState currentState;
-    protected Dictionary<States, IState> States = new Dictionary<States, IState>();
-
-    public PatrolManStateMachine(PatrolManController Owner)
+    public class PatrolManStateMachine : IStateMachine
     {
-        this.Owner = Owner;
-        CreateStates();
-        SetOwner();
-    }
+        private PatrolManController Owner;
+        private IState currentState;
+        protected Dictionary<States, IState> States = new Dictionary<States, IState>();
 
-    private void CreateStates()
-    {
-        States.Add(StatePattern.Enemy.States.IDLE, new IdleState(this));
-        States.Add(StatePattern.Enemy.States.IDLE, new PatrollingState(this));
-        States.Add(StatePattern.Enemy.States.IDLE, new ChasingState(this));
-        States.Add(StatePattern.Enemy.States.IDLE, new ShootingState(this));
-    }
-
-    private void SetOwner()
-    {
-        foreach (IState state in States.Values)
+        public PatrolManStateMachine(PatrolManController Owner)
         {
-            state.Owner = Owner;
+            this.Owner = Owner;
+            CreateStates();
+            SetOwner();
         }
-    }
 
-    public void Update() => currentState?.Update();
+        private void CreateStates()
+        {
+            States.Add(StateMachine.States.IDLE, new IdleState(this));
+            States.Add(StateMachine.States.PATROLLING, new PatrollingState(this));
+            States.Add(StateMachine.States.CHASING, new ChasingState(this));
+            States.Add(StateMachine.States.SHOOTING, new ShootingState(this));
+        }
 
-    public void ChangeState(States newState)
-    {
-        throw new System.NotImplementedException();
+        private void SetOwner()
+        {
+            foreach (IState state in States.Values)
+            {
+                state.Owner = Owner;
+            }
+        }
+
+        public void Update() => currentState?.Update();
+
+        protected void ChangeState(IState newState)
+        {
+            currentState?.OnStateExit();
+            currentState = newState;
+            currentState?.OnStateEnter();
+        }
+
+        public void ChangeState(States newState) => ChangeState(States[newState]);
     }
 }
