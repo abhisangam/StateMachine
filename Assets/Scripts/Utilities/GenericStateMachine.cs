@@ -21,7 +21,10 @@ public class GenericStateMachine<T> where T : EnemyController
         currentState?.OnStateEnter();
     }
 
-    public void ChangeState(States newState) => ChangeState(States[newState]);
+    public void ChangeState(States newState)
+    {
+        ChangeState(States[newState]);
+    }
 
     protected void SetOwner()
     {
